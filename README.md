@@ -35,7 +35,7 @@ cd pokemon-pokedex
    pip install -r requirements.txt
    ```
 5. Apply Database Migrations
-   ````
+   ```
    python manage.py makemigrations
    python manage.py migrate
    ```
