@@ -1,7 +1,6 @@
 import strawberry
 from typing import Optional, List
 from strawberry.types import Info
-from strawberry.django import type as strawberry_type
 from .models import Pokemon, Type
 from django.db.models import Q
 
@@ -10,7 +9,7 @@ class TypeType:
     id: strawberry.ID
     name: str
 
-@strawberry.type
+@strawberry.type  # Use strawberry.type directly
 class PokemonType:
     id: int
     name: str
@@ -50,7 +49,7 @@ class Query:
                 name=pokemon.name,
                 height=pokemon.height,
                 weight=pokemon.weight,
-                types=list(pokemon.types.all())
+                types=[TypeType(id=type.id, name=type.name) for type in pokemon.types.all()]
             )
         return None
 
@@ -68,7 +67,7 @@ class Query:
                 name=pokemon.name,
                 height=pokemon.height,
                 weight=pokemon.weight,
-                types=list(pokemon.types.all())
+                types=[TypeType(id=type.id, name=type.name) for type in pokemon.types.all()]
             ) for pokemon in queryset
         ]
 
@@ -77,7 +76,7 @@ class Query:
         queryset = Type.objects.all()
         if search:
             queryset = queryset.filter(name__icontains=search)
-        return list(queryset)
+        return [TypeType(id=type.id, name=type.name) for type in queryset]
 
 @strawberry.type
 class Mutation:
@@ -104,7 +103,7 @@ class Mutation:
             name=new_pokemon.name,
             height=new_pokemon.height,
             weight=new_pokemon.weight,
-            types=list(new_pokemon.types.all())
+            types=[TypeType(id=type.id, name=type.name) for type in new_pokemon.types.all()]
         )
 
     @strawberry.mutation
@@ -129,7 +128,7 @@ class Mutation:
             name=pokemon.name,
             height=pokemon.height,
             weight=pokemon.weight,
-            types=list(pokemon.types.all())
+            types=[TypeType(id=type.id, name=type.name) for type in pokemon.types.all()]
         )
 
     @strawberry.mutation
