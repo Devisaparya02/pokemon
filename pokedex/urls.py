@@ -1,5 +1,5 @@
 """
-URL configuration for hp_api project.
+URL configuration for pokedex project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -15,15 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.http import JsonResponse
+from django.urls import path
+from django.http import HttpResponse
+from strawberry.django.views import GraphQLView
+from pokemon.schema import schema
 
-# Simple homepage response
 def home(request):
-    return JsonResponse({"message": "Welcome to the Harry Potter API!", "api_docs": "/api/"})
+    return HttpResponse("<h1>Welcome to the Pokémon Pokedex API</h1><p>Go to <a href='/graphql/'>GraphQL Playground</a></p>")
 
 urlpatterns = [
-    path('', home),  # Root URL to prevent 404 errors
-    path('admin/', admin.site.urls),
-    path('api/', include('characters.urls')),  # Correct way to include API URLs
+    path("", home),  # New homepage route
+    path("admin/", admin.site.urls),
+    path("graphql/", GraphQLView.as_view(schema=schema)),
 ]
+
