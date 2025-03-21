@@ -1,108 +1,96 @@
-Harry Potter Character API
+# Pokémon Pokedex API
 
-This is a Django REST API for managing Harry Potter characters, allowing CRUD operations (Create, Read, Update, Delete).
+This is a Django GraphQL API for managing Pokémon, allowing various operations such as querying Pokémon details, adding new Pokémon, and deleting them.
 
+## Features
+- Query Pokémon by name
+- List Pokémon with details like height, weight, and types
+- Add new Pokémon
+- Delete Pokémon by ID
 
+## Installation Guide
 
-Features
- List all characters
- Filter by house & role
- Search for characters by name
- Create new characters
- Update and delete characters
-
- Installation Guide
- A) Clone the Repository
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR-USERNAME/harry-potter-api.git
-cd harry-potter-api
- B) Create a Virtual Environment
-bash
-python -m venv venv
-Activate the Virtual Environment
-Windows:
-bash
+git clone https://github.com/your-username/pokemon-pokedex.git
+cd pokemon-pokedex
+```
 
-venv\Scripts\activate
-Mac/Linux:
-bash
+2. Create a Virtual Environment
+   ```
+    python -m venv venv
+   ```
+3. Activate the Virtual Environment
+   On Windows:
+   ```
+   venv\Scripts\activate
+   ```
+   On Mac/Linux:
+   ```
+   source venv/bin/activate
+   ```
+4. Install Dependencies
+   
+   ```
+   pip install -r requirements.txt
+   ```
+5. Apply Database Migrations
+   ````
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+ 6. Populate the Database
+    ```
+    python manage.py populate_pokemon    
+    ```
+7. Start the Django Development Server
+   ```
+   python manage.py runserver
+   ```
+8.Access the GraphQL Playground
+Visit GraphQL Playground to interact with the API.
 
-source venv/bin/activate
- D) Install Dependencies
-bash
+Usage
+Query Pokémon by Name
 
-pip install -r requirements.txt
- Run the Project
- A) Apply Database Migrations
-bash
+```
+query {
+  pokemon(name: "pikachu") {
+    name
+    height
+    weight
+    types {
+      name
+    }
+  }
+}
+````
+Add a Pokémon
 
-python manage.py makemigrations
-python manage.py migrate
- B) Create a Superuser (Optional)
-bash
+```
+mutation {
+  addPokemon(pokemon: {
+    name: "charizard",
+    height: 17,
+    weight: 905,
+    type_ids: [1, 2]  # Replace with actual type IDs
+  }) {
+    name
+    height
+    weight
+  }
+}
+```
+Delete a Pokémon
+```
+mutation {
+  deletePokemon(id: 25)  # Deletes Pikachu
+}
+```
+Running Tests
+```
+pytest
+```
 
-python manage.py createsuperuser
+    
 
-
- C) Start the Django Server
-bash
-
-python manage.py runserver
- The server will start at:
-http://127.0.0.1:8000/
-
- API Endpoints
-Method	Endpoint	Description
-GET	/api/characters/	Get all characters
-GET	/api/characters/?house=Gryffindor	Filter characters by house
-GET	/api/characters/?search=Harry	Search for characters
-POST	/api/characters/	Add a new character
-GET	/api/characters/1/	Get details of a character by ID
-PUT	/api/characters/1/	Update a character by ID
-DELETE	/api/characters/1/	Delete a character by ID
- Test the API Using cURL
- A) List All Characters
-bash
-
-curl -X GET http://127.0.0.1:8000/api/characters/
- B) Create a New Character
-bash
-
-curl -X POST http://127.0.0.1:8000/api/characters/ \
-     -H "Content-Type: application/json" \
-     -d '{
-        "name": "Hermione Granger",
-        "house": "Gryffindor",
-        "role": "Student",
-        "wand": "Vine wood, Dragon heartstring",
-        "patronus": "Otter"
-     }'
- C) Update a Character
-bash
-
-curl -X PUT http://127.0.0.1:8000/api/characters/1/ \
-     -H "Content-Type: application/json" \
-     -d '{
-        "name": "Hermione Granger",
-        "house": "Gryffindor",
-        "role": "Professor",
-        "wand": "Vine wood, Dragon heartstring",
-        "patronus": "Otter"
-     }'
- D) Delete a Character
-bash
-
-curl -X DELETE http://127.0.0.1:8000/api/characters/1/
- Test the API Using Postman
-Open Postman
-Set Method (GET, POST, PUT, DELETE)
-Enter URL (http://127.0.0.1:8000/api/characters/)
-Go to "Body" → Select "raw" → Choose "JSON"
-Enter request data (for POST & PUT)
-Click "Send"
- Running Unit Tests
-To test API functionality, run:
-
-bash
-
-python manage.py test
