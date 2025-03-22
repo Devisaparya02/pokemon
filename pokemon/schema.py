@@ -4,33 +4,29 @@ from strawberry.types import Info
 from .models import Pokemon, Type
 from django.db.models import Q
 
+
 @strawberry.type
 class TypeType:
     id: strawberry.ID
     name: str
 
-@strawberry.type  # Use strawberry.type directly
+
+@strawberry.type
 class PokemonType:
     id: int
     name: str
     height: float
     weight: float
-    types: List[TypeType] = strawberry.field(default_factory=list)  # Ensure types is always a list
+    types: List[TypeType] = strawberry.field(default_factory=list)
+
 
 @strawberry.input
 class PokemonInputType:
-    name: str
-    pokemon_id: int
-    height: float
-    weight: float
-    type_ids: List[int]
-
-@strawberry.input
-class PokemonUpdateInput:
     name: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
-    type_ids: Optional[List[int]] = None
+    typeIds: Optional[List[int]] = None
+
 
 @strawberry.type
 class Query:
@@ -78,37 +74,12 @@ class Query:
             queryset = queryset.filter(name__icontains=search)
         return [TypeType(id=type.id, name=type.name) for type in queryset]
 
+
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    def add_pokemon(self, pokemon: PokemonInputType) -> PokemonType:
-        if Pokemon.objects.filter(pokemon_id=pokemon.pokemon_id).exists():
-            raise Exception(f"Pokémon with ID {pokemon.pokemon_id} already exists.")
-
-        new_pokemon = Pokemon.objects.create(
-            pokemon_id=pokemon.pokemon_id,
-            name=pokemon.name,
-            height=pokemon.height,
-            weight=pokemon.weight
-        )
-
-        if pokemon.type_ids:
-            types = Type.objects.filter(id__in=pokemon.type_ids)
-            new_pokemon.types.set(types)
-
-        new_pokemon.save()
-
-        return PokemonType(
-            id=new_pokemon.id,
-            name=new_pokemon.name,
-            height=new_pokemon.height,
-            weight=new_pokemon.weight,
-            types=[TypeType(id=type.id, name=type.name) for type in new_pokemon.types.all()]
-        )
-
-    @strawberry.mutation
-    def update_pokemon(self, pokemon_id: int, update: PokemonUpdateInput) -> PokemonType:
-        pokemon = Pokemon.objects.filter(pokemon_id=pokemon_id).first()
+    def update_pokemon(self, id: int, update: PokemonInputType) -> PokemonType:
+        pokemon = Pokemon.objects.filter(pk=id).first()
         if not pokemon:
             raise Exception("Pokémon not found.")
 
@@ -118,8 +89,8 @@ class Mutation:
             pokemon.height = update.height
         if update.weight:
             pokemon.weight = update.weight
-        if update.type_ids:
-            types = Type.objects.filter(id__in=update.type_ids)
+        if update.typeIds:
+            types = Type.objects.filter(id__in=update.typeIds)
             pokemon.types.set(types)
 
         pokemon.save()
@@ -131,9 +102,5 @@ class Mutation:
             types=[TypeType(id=type.id, name=type.name) for type in pokemon.types.all()]
         )
 
-    @strawberry.mutation
-    def delete_pokemon(self, id: int) -> bool:
-        deleted, _ = Pokemon.objects.filter(pk=id).delete()
-        return bool(deleted)
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
