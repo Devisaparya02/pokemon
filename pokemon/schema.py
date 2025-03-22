@@ -22,10 +22,19 @@ class PokemonType:
 
 @strawberry.input
 class PokemonInputType:
+    name: str
+    pokemonId: int  # Use camelCase
+    height: float
+    weight: float
+    typeIds: List[int]  # Use camelCase
+
+
+@strawberry.input
+class PokemonUpdateInput:
     name: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
-    typeIds: Optional[List[int]] = None
+    typeIds: Optional[List[int]] = None  # Use camelCase
 
 
 @strawberry.type
@@ -78,7 +87,32 @@ class Query:
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    def update_pokemon(self, id: int, update: PokemonInputType) -> PokemonType:
+    def add_pokemon(self, pokemon: PokemonInputType) -> PokemonType:
+        if Pokemon.objects.filter(pokemon_id=pokemon.pokemonId).exists():
+            raise Exception(f"Pokémon with ID {pokemon.pokemonId} already exists.")
+
+        new_pokemon = Pokemon.objects.create(
+            pokemon_id=pokemon.pokemonId,
+            name=pokemon.name,
+            height=pokemon.height,
+            weight=pokemon.weight
+        )
+
+        if pokemon.typeIds:
+            types = Type.objects.filter(id__in=pokemon.typeIds)
+            new_pokemon.types.set(types)
+
+        new_pokemon.save()
+        return PokemonType(
+            id=new_pokemon.id,
+            name=new_pokemon.name,
+            height=new_pokemon.height,
+            weight=new_pokemon.weight,
+            types=[TypeType(id=type.id, name=type.name) for type in new_pokemon.types.all()]
+        )
+
+    @strawberry.mutation
+    def update_pokemon(self, id: int, update: PokemonUpdateInput) -> PokemonType:
         pokemon = Pokemon.objects.filter(pk=id).first()
         if not pokemon:
             raise Exception("Pokémon not found.")
